@@ -35,19 +35,27 @@ def check_test_output(capfd):
         if count == 0 or count - cnt > 0:
             stderr = cp.sub('', stderr, count=count - cnt)
 
-    patterns = [ r'\b{}\b'.format(x) for x in
-                 ('exception', 'error', 'warning', 'fatal', 'traceback',
-                    'fault', 'crash(?:ed)?', 'abort(?:ed)',
-                    'uninitiali[zs]ed') ]
+    patterns = [
+        f'\b{x}\b'
+        for x in (
+            'exception',
+            'error',
+            'warning',
+            'fatal',
+            'traceback',
+            'fault',
+            'crash(?:ed)?',
+            'abort(?:ed)',
+            'uninitiali[zs]ed',
+        )
+    ]
     patterns += ['^==[0-9]+== ']
     for pattern in patterns:
         cp = re.compile(pattern, re.IGNORECASE | re.MULTILINE)
-        hit = cp.search(stderr)
-        if hit:
-            raise AssertionError('Suspicious output to stderr (matched "%s")' % hit.group(0))
-        hit = cp.search(stdout)
-        if hit:
-            raise AssertionError('Suspicious output to stdout (matched "%s")' % hit.group(0))
+        if hit := cp.search(stderr):
+            raise AssertionError(f'Suspicious output to stderr (matched "{hit[0]}")')
+        if hit := cp.search(stdout):
+            raise AssertionError(f'Suspicious output to stdout (matched "{hit[0]}")')
 
 def register_output(self, pattern, count=1, flags=re.MULTILINE):
     '''Register *pattern* as false positive for output checking

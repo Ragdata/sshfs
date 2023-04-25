@@ -59,8 +59,12 @@ def test_sshfs(tmpdir, debug, cache_timeout, sync_rd, multiconn, capfd):
     mnt_dir = str(tmpdir.mkdir('mnt'))
     src_dir = str(tmpdir.mkdir('src'))
 
-    cmdline = base_cmdline + [ pjoin(basename, 'sshfs'),
-                               '-f', 'localhost:' + src_dir, mnt_dir ]
+    cmdline = base_cmdline + [
+        pjoin(basename, 'sshfs'),
+        '-f',
+        f'localhost:{src_dir}',
+        mnt_dir,
+    ]
     if debug:
         cmdline += [ '-o', 'sshfs_debug' ]
 
@@ -133,7 +137,7 @@ def os_create(name):
 
 def tst_unlink(src_dir, mnt_dir, cache_timeout):
     name = name_generator()
-    fullname = mnt_dir + "/" + name
+    fullname = f"{mnt_dir}/{name}"
     with open(pjoin(src_dir, name), 'wb') as fh:
         fh.write(b'hello')
     if cache_timeout:
@@ -148,7 +152,7 @@ def tst_unlink(src_dir, mnt_dir, cache_timeout):
 
 def tst_mkdir(mnt_dir):
     dirname = name_generator()
-    fullname = mnt_dir + "/" + dirname
+    fullname = f"{mnt_dir}/{dirname}"
     os.mkdir(fullname)
     fstat = os.stat(fullname)
     assert stat.S_ISDIR(fstat.st_mode)
@@ -158,7 +162,7 @@ def tst_mkdir(mnt_dir):
 
 def tst_rmdir(src_dir, mnt_dir, cache_timeout):
     name = name_generator()
-    fullname = mnt_dir + "/" + name
+    fullname = f"{mnt_dir}/{name}"
     os.mkdir(pjoin(src_dir, name))
     if cache_timeout:
         safe_sleep(cache_timeout+1)
@@ -172,7 +176,7 @@ def tst_rmdir(src_dir, mnt_dir, cache_timeout):
 
 def tst_symlink(mnt_dir):
     linkname = name_generator()
-    fullname = mnt_dir + "/" + linkname
+    fullname = f"{mnt_dir}/{linkname}"
     os.symlink("/imaginary/dest", fullname)
     fstat = os.lstat(fullname)
     assert stat.S_ISLNK(fstat.st_mode)
@@ -320,9 +324,9 @@ def tst_readdir(src_dir, mnt_dir):
     newdir = name_generator()
     src_newdir = pjoin(src_dir, newdir)
     mnt_newdir = pjoin(mnt_dir, newdir)
-    file_ = src_newdir + "/" + name_generator()
-    subdir = src_newdir + "/" + name_generator()
-    subfile = subdir + "/" + name_generator()
+    file_ = f"{src_newdir}/{name_generator()}"
+    subdir = f"{src_newdir}/{name_generator()}"
+    subfile = f"{subdir}/{name_generator()}"
 
     os.mkdir(src_newdir)
     shutil.copyfile(TEST_FILE, file_)
